@@ -1,0 +1,19 @@
+Visual thing is interesting:
+
+Visual board state based on the camera input
+	--Number 1: Use a chessboard as the background
+	--Number 2: (Error checking or cheating detection)
+
+
+
+Robust Level for an A:
+	-Should be able to play chess with it robustly
+	-Robot has a chess engine
+	-Robot should check if players are cheating 
+		--Make sure that the player is not cheeting
+			--(change baxter's face to be mad when you cheat)
+
+
+
+Smart phone app:
+	--Amir: email Valmir to forward to Amir
