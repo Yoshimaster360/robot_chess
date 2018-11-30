@@ -7,6 +7,16 @@ from geometry_msgs.msg import PoseStamped
 from moveit_commander import MoveGroupCommander
 from baxter_interface import gripper as robot_gripper
 
+import tf2_ros
+
+def initial_setup():
+    #Calibrate the gripper (other commands won't work unless you do this first)
+    print('Calibrating...')
+    right_gripper.calibrate()  
+
+    trans = tfBuffer.lookup_transform("base","left_gripper" , rospy.Time()) 
+    return(trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z)
+
 def get_move_data(move_string,canmove):
     # Assume Remove will come in as R-##-##
     # Asume Move will come in as M-##-##
@@ -15,7 +25,7 @@ def get_move_data(move_string,canmove):
             if move_string[0][0] == 'R':
                     remove_location = move_string[0][2:4]
                     remove_destination = move_string[0][5:7]
-            else:
+            else:    
                     remove_location = 'N'
     if canmove == 1:
             if move_string[1][0] == 'M':
@@ -79,7 +89,7 @@ def cbgs(origin_deviation):
 # 1st index is the move from coordinates
 # 2nd index is move to coordinates
 
-def coordinates(origin_deviation, move_string, canmove):
+def coordinates(origin_deviation, move_string, canmove,initial_xyz):
     gridmapping = {'A8':[0,0], 'B8':[0,1], 'C8':[0,2], 'D8':[0,3], 
                                  'E8':[0,4], 'F8':[0,5], 'G8':[0,6], 'H8':[0,7],
 
@@ -107,16 +117,16 @@ def coordinates(origin_deviation, move_string, canmove):
                                  '00':[3,3]                                      }
     
     cb = cbgs(origin_deviation)
-    coor_remove_from = cb[gridmapping[get_move_data(move_string,canmove)[0]][0]][gridmapping[get_move_data(move_string,canmove)[0]][1]] + [.580, .643]
-    coor_remove_to = cb[gridmapping[get_move_data(move_string,canmove)[1]][0]][gridmapping[get_move_data(move_string,canmove)[1]][1]] + [.25,.25] + [.580, .643]  
-    coor_move_from = cb[gridmapping[get_move_data(move_string,canmove)[2]][0]][gridmapping[get_move_data(move_string,canmove)[2]][1]] + [.580, .643]
-    coor_move_to = cb[gridmapping[get_move_data(move_string,canmove)[3]][0]][gridmapping[get_move_data(move_string,canmove)[3]][1]] + [.580, .643]
+    coor_remove_from = cb[gridmapping[get_move_data(move_string,canmove)[0]][0]][gridmapping[get_move_data(move_string,canmove)[0]][1]] + [initial_xyz[0], initial_xyz[1]]
+    coor_remove_to = cb[gridmapping[get_move_data(move_string,canmove)[1]][0]][gridmapping[get_move_data(move_string,canmove)[1]][1]] + [.1,.1] + [initial_xyz[0], initial_xyz[1]] 
+    coor_move_from = cb[gridmapping[get_move_data(move_string,canmove)[2]][0]][gridmapping[get_move_data(move_string,canmove)[2]][1]] + [initial_xyz[0], initial_xyz[1]]
+    coor_move_to = cb[gridmapping[get_move_data(move_string,canmove)[3]][0]][gridmapping[get_move_data(move_string,canmove)[3]][1]] + [initial_xyz[0], initial_xyz[1]]
     return([coor_remove_from,coor_remove_to,coor_move_from,coor_move_to])
 
 def movement(des_coor):
     #Wait for the IK service to become available
     rospy.wait_for_service('compute_ik')
-    rospy.init_node('service_query')
+    # rospy.init_node('movement')
     received_info = True
     #Create the function used to call the service
     compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
@@ -127,13 +137,13 @@ def movement(des_coor):
         request.ik_request.group_name = "left_arm"
         request.ik_request.ik_link_name = "left_gripper"
         request.ik_request.attempts = 20
-        request.ik_request.pose_stamped.header.frame_id = "base"
+        request.ik_request.pose_stamped.header.frame_id = "base"       
         
         #Set the desired orientation for the end effector HERE
         print(des_coor)
-        request.ik_request.pose_stamped.pose.position.x = des_coor[0] + .025
-        request.ik_request.pose_stamped.pose.position.y = des_coor[1] + .025
-        request.ik_request.pose_stamped.pose.position.z = -0.025 # this should be a found constant        
+        request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
+        request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
+        request.ik_request.pose_stamped.pose.position.z = -0.025 + initial_xyz[2] # this should be a found constant        
         # Should be constant Determined by Experiment
         request.ik_request.pose_stamped.pose.orientation.x = 0.0 
         request.ik_request.pose_stamped.pose.orientation.y = 1.0
@@ -173,23 +183,27 @@ def movement(des_coor):
     # #rospy.init_node('gripper_test')
 
     # #Set up the right gripper
-    right_gripper = robot_gripper.Gripper('left')
+    # right_gripper = robot_gripper.Gripper('left')
 
-    #Calibrate the gripper (other commands won't work unless you do this first)
-    print('Calibrating...')
-    right_gripper.calibrate()
-    rospy.sleep(2.0)
+    # #Calibrate the gripper (other commands won't work unless you do this first)
+    # print('Calibrating...')
+    # right_gripper.calibrate()
+    # rospy.sleep(2.0)
 
     #Close the right gripper
     print('Closing...')
-    right_gripper.close(.041667)
-    rospy.sleep(1.0)
+    right_gripper.close()
+    rospy.sleep(0.5)
 
     #Open the right gripper
     print('Opening...')
     right_gripper.open()
-    rospy.sleep(1.0)
+    rospy.sleep(0.5)
     print('Done!') 
+    
+    # trans = tfBuffer.lookup_transform("base","left_gripper" , rospy.Time()) 
+    # print(trans.transform.translation.x)
+    
 
 #Python's syntax for a main() method
 def main():
@@ -197,14 +211,21 @@ def main():
 if __name__ == '__main__':
     main()
     #Test
+    rospy.init_node('movement')   
+    right_gripper = robot_gripper.Gripper('left')
+    tfBuffer = tf2_ros.Buffer()
+    tfListener = tf2_ros.TransformListener(tfBuffer) 
+
+    initial_xyz = initial_setup()   
+    
     move_string = []
-    move_string.append('R-G5-00')
-    move_string.append('M-E4-G4')
+    move_string.append('R-A1-E5')
+    move_string.append('M-A1-G4')
     canmove = 1
     origin_deviation=[0,0,0]
-    movement_coordinates = (coordinates(origin_deviation,move_string,canmove))
+    movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
     des_coor = movement_coordinates[0]
-    for i in range(4):
-        movement(movement_coordinates[i])
+
+    movement(des_coor)
 
 
