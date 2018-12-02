@@ -6,11 +6,10 @@ from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKRe
 from geometry_msgs.msg import PoseStamped
 from moveit_commander import MoveGroupCommander
 from baxter_interface import gripper as robot_gripper
-
 import tf2_ros
 
 def initial_setup():
-    #Calibrate the gripper (other commands won't work unless you do this first)
+    #Calibrate the gripper (other commands won't work unless you do this first
     print('Calibrating...')
     right_gripper.calibrate()  
 
@@ -126,17 +125,66 @@ def coordinates(origin_deviation, move_string, canmove,initial_xyz):
 def movement(des_coor):
     #Wait for the IK service to become available
     rospy.wait_for_service('compute_ik')
-    # rospy.init_node('movement')
     received_info = True
     #Create the function used to call the service
     compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
     while received_info == True:           
-        #raw_input('Press [ Enter ]: ')
+
         #Construct the requests
         request = GetPositionIKRequest()
         request.ik_request.group_name = "left_arm"
         request.ik_request.ik_link_name = "left_gripper"
-        request.ik_request.attempts = 20
+        request.ik_request.attempts = 40
+        request.ik_request.pose_stamped.header.frame_id = "base"       
+        
+        #Set the desired orientation for the end effector HERE
+        print(des_coor)
+        request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
+        request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
+        request.ik_request.pose_stamped.pose.position.z = .5 + initial_xyz[2] # this should be a found constant        
+        # Should be constant Determined by Experiment
+        request.ik_request.pose_stamped.pose.orientation.x = 0.0 
+        request.ik_request.pose_stamped.pose.orientation.y = 1.0
+        request.ik_request.pose_stamped.pose.orientation.z = 0.0
+        request.ik_request.pose_stamped.pose.orientation.w = 0.0
+        
+        try:
+            #Send the request to the service
+            response = compute_ik(request)
+                
+            #Print the response HERE
+            print(response)
+            if response. #figure out object deets later:
+                received_info = False
+            else:
+                received_info = True
+            
+            group = MoveGroupCommander("left_arm")
+
+            # Setting position and orientation target
+            group.set_pose_target(request.ik_request.pose_stamped)
+
+            # Plan IK and execute
+            group.go()
+                
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+        if i == 0 or i==2:
+            release()
+    
+    #Wait for the IK service to become available
+    rospy.wait_for_service('compute_ik')
+    received_info = True
+    #Create the function used to call the service
+    compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
+    while received_info == True:           
+
+        #Construct the requests
+        request = GetPositionIKRequest()
+        request.ik_request.group_name = "left_arm"
+        request.ik_request.ik_link_name = "left_gripper"
+        request.ik_request.attempts = 40
         request.ik_request.pose_stamped.header.frame_id = "base"       
         
         #Set the desired orientation for the end effector HERE
@@ -156,6 +204,11 @@ def movement(des_coor):
                 
             #Print the response HERE
             print(response)
+            if response. #figure out object deets later:
+                received_info = False
+            else:
+                received_info = True
+            
             group = MoveGroupCommander("left_arm")
 
             # Setting position and orientation target
@@ -163,46 +216,73 @@ def movement(des_coor):
 
             # Plan IK and execute
             group.go()
-            received_info = False
                 
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
-        
-        # try:
-        #         #Send the request to the service
-        #         response = compute_ik(request)
+
+        if i == 0 or 2:
+            grab()
+        if i == 1 or 3:
+            release()
+
+        #Wait for the IK service to become available
+        rospy.wait_for_service('compute_ik')
+        received_info = True
+        #Create the function used to call the service
+        compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
+        while received_info == True:           
+
+            #Construct the requests
+            request = GetPositionIKRequest()
+            request.ik_request.group_name = "left_arm"
+            request.ik_request.ik_link_name = "left_gripper"
+            request.ik_request.attempts = 40
+            request.ik_request.pose_stamped.header.frame_id = "base"       
+            
+            #Set the desired orientation for the end effector HERE
+            print(des_coor)
+            request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
+            request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
+            request.ik_request.pose_stamped.pose.position.z = 0.5 + initial_xyz[2] # this should be a found constant        
+            # Should be constant Determined by Experiment
+            request.ik_request.pose_stamped.pose.orientation.x = 0.0 
+            request.ik_request.pose_stamped.pose.orientation.y = 1.0
+            request.ik_request.pose_stamped.pose.orientation.z = 0.0
+            request.ik_request.pose_stamped.pose.orientation.w = 0.0
+            
+            try:
+                #Send the request to the service
+                response = compute_ik(request)
+                    
+                #Print the response HERE
+                print(response)
+                if response. #figure out object deets later:
+                    received_info = False
+                    close_gripper = True
+                else:
+                    received_info = True
                 
-        #         #Print the response HERE
-        #         print('Got Here')
-        #         received_info = False
-        #         print(response)
-                
-        # except rospy.ServiceException, e:
-        #         print "Service call failed: %s"%e
-    # print('Gothere')
-    # #rospy.init_node('gripper_test')
+                group = MoveGroupCommander("left_arm")
 
-    # #Set up the right gripper
-    # right_gripper = robot_gripper.Gripper('left')
+                # Setting position and orientation target
+                group.set_pose_target(request.ik_request.pose_stamped)
 
-    # #Calibrate the gripper (other commands won't work unless you do this first)
-    # print('Calibrating...')
-    # right_gripper.calibrate()
-    # rospy.sleep(2.0)
+                # Plan IK and execute
+                group.go()
+                    
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
 
+
+def grab():
     #Close the right gripper
     print('Closing...')
     right_gripper.close()
-    rospy.sleep(0.5)
 
+def release():
     #Open the right gripper
     print('Opening...')
-    right_gripper.open()
-    rospy.sleep(0.5)
-    print('Done!') 
-    
-    # trans = tfBuffer.lookup_transform("base","left_gripper" , rospy.Time()) 
-    # print(trans.transform.translation.x)
+    right_gripper.open(.25)
     
 
 #Python's syntax for a main() method
@@ -224,8 +304,9 @@ if __name__ == '__main__':
     canmove = 1
     origin_deviation=[0,0,0]
     movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
-    des_coor = movement_coordinates[0]
 
-    movement(des_coor)
+    for i in range(4):
+        movement(movement_coordinates[i])
+
 
 
