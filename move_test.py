@@ -41,14 +41,14 @@ def get_move_data(move_string,canmove):
 # Origin deviation of the form [x,y,theta]
 
 def cbgs(origin_deviation):
-    cb = np.array([[ [-.175,.175], [-.125,.175], [-.075,.175], [-.025,.175], [.025,.175], [.075,.175], [.125,.175], [.175,.175] ],
-                                 [ [-.175,.125], [-.125,.125], [-.075,.125], [-.025,.125], [.025,.125], [.075,.125], [.125,.125], [.175,.125] ], 
-                                 [ [-.175,.075], [-.125,.075], [-.075,.075], [-.025,.075], [.025,.075], [.075,.075], [.125,.075], [.175,.075] ],
-                                 [ [-.175,.025], [-.125,.025], [-.075,.025], [-.025,.025], [.025,.025], [.075,.025], [.125,.025], [.175,.025] ],
-                                 [ [-.175,-.025], [-.125,-.025], [-.075,-.025], [-.025,-.025], [.025,-.025], [.075,-.025], [.125,-.025], [.175,-.025] ],
-                                 [ [-.175,-.075], [-.125,-.075], [-.075,-.075], [-.025,-.075], [.025,-.075], [.075,-.075], [.125,-.075], [.175,-.075] ],
-                                 [ [-.175,-.125], [-.125,-.125], [-.075,-.125], [-.025,-.125], [.025,-.125], [.075,-.125], [.125,-.125], [.175,-.125] ],
-                                 [ [-.175,-.175], [-.125,-.175], [-.075,-.175], [-.025,-.175], [.025,-.175], [.075,-.175], [.125,-.175], [.175,-.175] ] ])
+    cb = np.array([[               [-.2002,.2002],  [-.143,.2002],  [-.0858,.2002],  [-.0286,.2002],  [.0286,.2002],  [.0858,.2002],  [.143,.2002],  [.2002,.2002] ],
+                                 [ [-.2002,.143],   [-.143,.143],   [-.0858,.143],   [-.0286,.143],   [.0286,.143],   [.0858,.143],   [.143,.143],   [.2002,.143] ], 
+                                 [ [-.2002,.0858],  [-.143,.0858],  [-.0858,.0858],  [-.0286,.0858],  [.0286,.0858],  [.0858,.0858],  [.143,.0858],  [.2002,.0858] ],
+                                 [ [-.2002,.0286],  [-.143,.0286],  [-.0858,.0286],  [-.0286,.0286],  [.0286,.0286],  [.0858,.0286],  [.143,.0286],  [.2002,.0286] ],
+                                 [ [-.2002,-.0286], [-.143,-.0286], [-.0858,-.0286], [-.0286,-.0286], [.0286,-.0286], [.0858,-.0286], [.143,-.0286], [.2002,-.0286] ],
+                                 [ [-.2002,-.0858], [-.143,-.0858], [-.0858,-.0858], [-.0286,-.0858], [.0286,-.0858], [.0858,-.0858], [.143,-.0858], [.2002,-.0858] ],
+                                 [ [-.2002,-.143],  [-.143,-.143],  [-.0858,-.143],  [-.0286,-.143],  [.0286,-.143],  [.0858,-.143],  [.143,-.143],  [.2002,-.143] ],
+                                 [ [-.2002,-.2002], [-.143,-.2002], [-.0858,-.2002], [-.0286,-.2002], [.0286,-.2002], [.0858,-.2002], [.143,-.2002], [.2002,-.2002] ] ])
     
     if origin_deviation[0] != 0 or origin_deviation[1] != 0: 
             for i in range(cb.shape[0]):
@@ -113,16 +113,16 @@ def coordinates(origin_deviation, move_string, canmove,initial_xyz):
                                  'A1':[7,0], 'B1':[7,1], 'C1':[7,2], 'D1':[7,3], 
                                  'E1':[7,4], 'F1':[7,5], 'G1':[7,6], 'H1':[7,7], 
 
-                                 '00':[3,3]                                      }
+                                 '00':[3,7]                                      }
     
     cb = cbgs(origin_deviation)
-    coor_remove_from = cb[gridmapping[get_move_data(move_string,canmove)[0]][0]][gridmapping[get_move_data(move_string,canmove)[0]][1]] + [initial_xyz[0], initial_xyz[1]]
+    coor_remove_from = cb[gridmapping[get_move_data(move_string,canmove)[0]][0]][gridmapping[get_move_data(move_string,canmove)[0]][1]] + [initial_xyz[0], initial_xyz[1]] 
     coor_remove_to = cb[gridmapping[get_move_data(move_string,canmove)[1]][0]][gridmapping[get_move_data(move_string,canmove)[1]][1]] + [.1,.1] + [initial_xyz[0], initial_xyz[1]] 
-    coor_move_from = cb[gridmapping[get_move_data(move_string,canmove)[2]][0]][gridmapping[get_move_data(move_string,canmove)[2]][1]] + [initial_xyz[0], initial_xyz[1]]
-    coor_move_to = cb[gridmapping[get_move_data(move_string,canmove)[3]][0]][gridmapping[get_move_data(move_string,canmove)[3]][1]] + [initial_xyz[0], initial_xyz[1]]
+    coor_move_from = cb[gridmapping[get_move_data(move_string,canmove)[2]][0]][gridmapping[get_move_data(move_string,canmove)[2]][1]] + [initial_xyz[0], initial_xyz[1]] 
+    coor_move_to = cb[gridmapping[get_move_data(move_string,canmove)[3]][0]][gridmapping[get_move_data(move_string,canmove)[3]][1]] + [initial_xyz[0], initial_xyz[1]] 
     return([coor_remove_from,coor_remove_to,coor_move_from,coor_move_to])
 
-def movement(des_coor):
+def movement(des_coor, i):
     #Wait for the IK service to become available
     rospy.wait_for_service('compute_ik')
     received_info = True
@@ -134,14 +134,14 @@ def movement(des_coor):
         request = GetPositionIKRequest()
         request.ik_request.group_name = "left_arm"
         request.ik_request.ik_link_name = "left_gripper"
-        request.ik_request.attempts = 40
+        request.ik_request.attempts = 30
         request.ik_request.pose_stamped.header.frame_id = "base"       
         
         #Set the desired orientation for the end effector HERE
         print(des_coor)
         request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
         request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
-        request.ik_request.pose_stamped.pose.position.z = .5 + initial_xyz[2] # this should be a found constant        
+        request.ik_request.pose_stamped.pose.position.z = 0.25 + initial_xyz[2] # this should be a found constant        
         # Should be constant Determined by Experiment
         request.ik_request.pose_stamped.pose.orientation.x = 0.0 
         request.ik_request.pose_stamped.pose.orientation.y = 1.0
@@ -154,11 +154,11 @@ def movement(des_coor):
                 
             #Print the response HERE
             print(response)
-            if response. #figure out object deets later:
+            if response.error_code.val == 1: 
                 received_info = False
             else:
-                received_info = True
-            
+                received_info = False
+            # received_info = False
             group = MoveGroupCommander("left_arm")
 
             # Setting position and orientation target
@@ -170,8 +170,9 @@ def movement(des_coor):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        if i == 0 or i==2:
-            release()
+    if i == 0 or i==2:
+        print("I AM RELEASING")
+        release()
     
     #Wait for the IK service to become available
     rospy.wait_for_service('compute_ik')
@@ -184,14 +185,14 @@ def movement(des_coor):
         request = GetPositionIKRequest()
         request.ik_request.group_name = "left_arm"
         request.ik_request.ik_link_name = "left_gripper"
-        request.ik_request.attempts = 40
+        request.ik_request.attempts = 30
         request.ik_request.pose_stamped.header.frame_id = "base"       
         
         #Set the desired orientation for the end effector HERE
         print(des_coor)
         request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
         request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
-        request.ik_request.pose_stamped.pose.position.z = -0.025 + initial_xyz[2] # this should be a found constant        
+        request.ik_request.pose_stamped.pose.position.z = .015 + initial_xyz[2] # this should be a found constant        
         # Should be constant Determined by Experiment
         request.ik_request.pose_stamped.pose.orientation.x = 0.0 
         request.ik_request.pose_stamped.pose.orientation.y = 1.0
@@ -204,11 +205,11 @@ def movement(des_coor):
                 
             #Print the response HERE
             print(response)
-            if response. #figure out object deets later:
-                received_info = False
-            else:
-                received_info = True
-            
+            # if response. #figure out object deets later:
+            #     received_info = False
+            # else:
+            #     received_info = True
+            received_info = False
             group = MoveGroupCommander("left_arm")
 
             # Setting position and orientation target
@@ -220,70 +221,73 @@ def movement(des_coor):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        if i == 0 or 2:
-            grab()
-        if i == 1 or 3:
-            release()
+    if i == 0 or i == 2:
+        print("I AM GRABBING")
+        grab()
+    if i == 1 or i == 3:
+        print("I AM RELEASING")
+        release()
 
-        #Wait for the IK service to become available
-        rospy.wait_for_service('compute_ik')
-        received_info = True
-        #Create the function used to call the service
-        compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
-        while received_info == True:           
+    #Wait for the IK service to become available
+    rospy.wait_for_service('compute_ik')
+    received_info = True
+    #Create the function used to call the service
+    compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
+    while received_info == True:           
 
-            #Construct the requests
-            request = GetPositionIKRequest()
-            request.ik_request.group_name = "left_arm"
-            request.ik_request.ik_link_name = "left_gripper"
-            request.ik_request.attempts = 40
-            request.ik_request.pose_stamped.header.frame_id = "base"       
-            
-            #Set the desired orientation for the end effector HERE
-            print(des_coor)
-            request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
-            request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
-            request.ik_request.pose_stamped.pose.position.z = 0.5 + initial_xyz[2] # this should be a found constant        
-            # Should be constant Determined by Experiment
-            request.ik_request.pose_stamped.pose.orientation.x = 0.0 
-            request.ik_request.pose_stamped.pose.orientation.y = 1.0
-            request.ik_request.pose_stamped.pose.orientation.z = 0.0
-            request.ik_request.pose_stamped.pose.orientation.w = 0.0
-            
-            try:
-                #Send the request to the service
-                response = compute_ik(request)
-                    
-                #Print the response HERE
-                print(response)
-                if response. #figure out object deets later:
-                    received_info = False
-                    close_gripper = True
-                else:
-                    received_info = True
+        #Construct the requests
+        request = GetPositionIKRequest()
+        request.ik_request.group_name = "left_arm"
+        request.ik_request.ik_link_name = "left_gripper"
+        request.ik_request.attempts = 30
+        request.ik_request.pose_stamped.header.frame_id = "base"       
+        
+        #Set the desired orientation for the end effector HERE
+        print(des_coor)
+        request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
+        request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
+        request.ik_request.pose_stamped.pose.position.z = 0.25 + initial_xyz[2] # this should be a found constant        
+        # Should be constant Determined by Experiment
+        request.ik_request.pose_stamped.pose.orientation.x = 0.0 
+        request.ik_request.pose_stamped.pose.orientation.y = 1.0
+        request.ik_request.pose_stamped.pose.orientation.z = 0.0
+        request.ik_request.pose_stamped.pose.orientation.w = 0.0
+        
+        try:
+            #Send the request to the service
+            response = compute_ik(request)
                 
-                group = MoveGroupCommander("left_arm")
+            #Print the response HERE
+            print(response)
+            # if response. #figure out object deets later:
+            #     received_info = False
+            #     close_gripper = True
+            # else:
+            #     received_info = True
+            received_info = False
+            group = MoveGroupCommander("left_arm")
 
-                # Setting position and orientation target
-                group.set_pose_target(request.ik_request.pose_stamped)
+            # Setting position and orientation target
+            group.set_pose_target(request.ik_request.pose_stamped)
 
-                # Plan IK and execute
-                group.go()
-                    
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
+            # Plan IK and execute
+            group.go()
+                
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 
 
 def grab():
     #Close the right gripper
     print('Closing...')
     right_gripper.close()
+    rospy.sleep(.5)
 
 def release():
     #Open the right gripper
     print('Opening...')
-    right_gripper.open(.25)
-    
+    right_gripper.open()
+    rospy.sleep(.5)
 
 #Python's syntax for a main() method
 def main():
@@ -299,14 +303,13 @@ if __name__ == '__main__':
     initial_xyz = initial_setup()   
     
     move_string = []
-    move_string.append('R-A1-E5')
-    move_string.append('M-A1-G4')
+    move_string.append('R-H1-00')
+    move_string.append('M-A8-D5')
     canmove = 1
     origin_deviation=[0,0,0]
     movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
 
     for i in range(4):
-        movement(movement_coordinates[i])
-
+        movement(movement_coordinates[i], i)
 
 
