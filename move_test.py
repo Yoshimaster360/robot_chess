@@ -14,8 +14,8 @@ def initial_setup():
     right_gripper.calibrate()  
 
     trans = tfBuffer.lookup_transform("base","left_gripper" , rospy.Time()) 
-    return(trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z)
-
+    #return(trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z)
+    return(.5,.435,trans.transform.translation.z)
 def get_move_data(move_string,canmove):
     # Assume Remove will come in as R-##-##
     # Asume Move will come in as M-##-##
@@ -170,6 +170,57 @@ def movement(des_coor, i):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
+
+    #Wait for the IK service to become available
+    rospy.wait_for_service('compute_ik')
+    received_info = True
+    #Create the function used to call the service
+    compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
+    while received_info == True:           
+
+        #Construct the requests
+        request = GetPositionIKRequest()
+        request.ik_request.group_name = "left_arm"
+        request.ik_request.ik_link_name = "left_gripper"
+        request.ik_request.attempts = 30
+        request.ik_request.pose_stamped.header.frame_id = "base"       
+        
+        #Set the desired orientation for the end effector HERE
+        print(des_coor)
+        request.ik_request.pose_stamped.pose.position.x = des_coor[0] 
+        request.ik_request.pose_stamped.pose.position.y = des_coor[1] 
+        request.ik_request.pose_stamped.pose.position.z = .09 + initial_xyz[2] # this should be a found constant        
+        # Should be constant Determined by Experiment
+        request.ik_request.pose_stamped.pose.orientation.x = 0.0 
+        request.ik_request.pose_stamped.pose.orientation.y = 1.0
+        request.ik_request.pose_stamped.pose.orientation.z = 0.0
+        request.ik_request.pose_stamped.pose.orientation.w = 0.0
+        
+        try:
+            #Send the request to the service
+            response = compute_ik(request)
+                
+            #Print the response HERE
+            print(response)
+            if response.error_code.val == 1: 
+                received_info = False
+            else:
+                received_info = False
+            # received_info = False
+            group = MoveGroupCommander("left_arm")
+
+            # Setting position and orientation target
+            group.set_pose_target(request.ik_request.pose_stamped)
+
+            # Plan IK and execute
+            group.go()
+                
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+
+
+
     if i == 0 or i==2:
         print("I AM RELEASING")
         release()
@@ -300,11 +351,12 @@ if __name__ == '__main__':
     tfBuffer = tf2_ros.Buffer()
     tfListener = tf2_ros.TransformListener(tfBuffer) 
 
-    initial_xyz = initial_setup()   
+    initial_xyz = initial_setup()
+    movement([.5,.435],0)   
     
     move_string = []
-    move_string.append('R-H1-00')
-    move_string.append('M-A8-D5')
+    move_string.append('R-A8-00')
+    move_string.append('M-D5-A8')
     canmove = 1
     origin_deviation=[0,0,0]
     movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
@@ -312,4 +364,15 @@ if __name__ == '__main__':
     for i in range(4):
         movement(movement_coordinates[i], i)
 
+    move_string = []
+    move_string.append('R-A7-00')
+    move_string.append('M-A8-A7')
+    canmove = 1
+    origin_deviation=[0,0,0]
+    movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
+
+    for i in range(4):
+        movement(movement_coordinates[i], i)
+
+    
 
