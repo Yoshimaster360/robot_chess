@@ -8,7 +8,7 @@ import sounddevice as sd
 #http://www.fromtexttospeech.com/
 
 #Change to device 4 to play with speakers or whatever python -m sounddevice says the device number is
-playable_device = 3
+playable_device = 2
 
 def read_mp3(file_path, as_float = False):
     """
@@ -40,7 +40,6 @@ def play(clip):
 
     sample_freq = inputt[0]
     data = inputt[1]
-    print(data.shape)
     sd.play(data, sample_freq, device=playable_device)
     while(sd.wait()):
         pass
