@@ -46,6 +46,13 @@ def return_move_strings(board):
 	engine.position(board)
 	best_move = engine.go(movetime=2000).bestmove
 	print(best_move)
+	start, end = re.findall('[a-z][0-9]', str(best_move))
+	movement_string = 'M-{}-{}'.format(start, end)
+	if(board.remove_piece_at(square_name_index[start])):
+		remove_string = 'R-{}'.format(start)
+	else:
+		remove_string = None
+	return movement_string, remove_string
 
 
 
