@@ -7,6 +7,9 @@ from geometry_msgs.msg import PoseStamped
 from moveit_commander import MoveGroupCommander
 from intera_interface import gripper as robot_gripper
 import tf2_ros
+from std_msgs.msg import String
+from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray
 
 def initial_setup():
 	#Calibrate the gripper (other commands won't work unless you do this first
@@ -339,6 +342,18 @@ def release():
 	print('Opening...')
 	right_gripper.open()
 	rospy.sleep(.5)
+
+def callback(message):
+
+    #Print the contents of the message to the console
+    print(message.data)
+
+#Define the method which contains the node's main functionality
+def listener():
+    
+    rospy.Subscriber("origin_deviation", Float64MultiArray, callback)
+
+    rospy.spin()
 
 
 #Python's syntax for a main() method
