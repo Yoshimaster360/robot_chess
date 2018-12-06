@@ -48,8 +48,8 @@ def return_move_strings(board):
 	print(best_move)
 	start, end = re.findall('[a-z][0-9]', str(best_move))
 	movement_string = 'M-{}-{}'.format(start, end)
-	if(board.remove_piece_at(square_name_index[start])):
-		remove_string = 'R-{}'.format(start)
+	if(board.remove_piece_at(square_name_index[end])):
+		remove_string = 'R-{}'.format(end)
 	else:
 		remove_string = None
 	return movement_string, remove_string, best_move
@@ -101,7 +101,7 @@ def decode_player_movement(dic_previous, dic_current):
     if(len(dic_previous_mod.keys()) > 1 or len(dic_current_mod.keys()) > 1):
         return False, False
     elif(len(dic_previous_mod.keys()) == 1):
-        removes_detected.append('R-{}'.format(dict_previous_mode[list(dic_previous_mode.keys())[0]]))
+        removes_detected.append('R-{}'.format(dict_previous_mod[list(dic_previous_mod.keys())[0]]))
         
     return moves_detected, removes_detected
 
