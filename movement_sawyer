@@ -10,6 +10,8 @@ import tf2_ros
 from std_msgs.msg import String
 from std_msgs.msg import Float64
 from std_msgs.msg import Float64MultiArray
+message_list = []
+
 
 def initial_setup():
 	#Calibrate the gripper (other commands won't work unless you do this first
@@ -347,13 +349,15 @@ def callback(message):
 
     #Print the contents of the message to the console
     print(message.data)
+    message_list.append(message.data)
 
 #Define the method which contains the node's main functionality
-def listener():
+def listen():
     
     rospy.Subscriber("origin_deviation", Float64MultiArray, callback)
 
-    rospy.spin()
+    #rospy.spin()
+    rospy.sleep(2)
 
 
 #Python's syntax for a main() method
@@ -362,35 +366,37 @@ def main():
 if __name__ == '__main__':
 	main()
 	#Test
-	rospy.init_node('movement')   
-	right_gripper = robot_gripper.Gripper('right_gripper')
-	tfBuffer = tf2_ros.Buffer()
-	rospy.sleep(1)
-	tfListener = tf2_ros.TransformListener(tfBuffer) 
+	rospy.init_node('movement')
+	listen()
+	print(message_list[0][0])   
+	# right_gripper = robot_gripper.Gripper('right_gripper')
+	# tfBuffer = tf2_ros.Buffer()
+	# rospy.sleep(1)
+	# tfListener = tf2_ros.TransformListener(tfBuffer) 
 
 
-	initial_xyz = initial_setup()
-	movement([.500,.447],0)   
+	# initial_xyz = initial_setup()
+	# movement([.500,.447],0)   
 	
-	move_string = []
-	move_string.append('R-A8-00')
-	move_string.append('M-D5-A8')
-	canmove = 1
-	origin_deviation=[0,0,0]
-	movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
+	# move_string = []
+	# move_string.append('R-A8-00')
+	# move_string.append('M-D5-A8')
+	# canmove = 1
+	# origin_deviation=[0,0,0]
+	# movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
 
-	for i in range(4):
-		movement(movement_coordinates[i], i)
+	# for i in range(4):
+	# 	movement(movement_coordinates[i], i)
 
-	move_string = []
-	move_string.append('R-A7-00')
-	move_string.append('M-A8-A7')
-	canmove = 1
-	origin_deviation=[0,0,0]
-	movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
+	# move_string = []
+	# move_string.append('R-A7-00')
+	# move_string.append('M-A8-A7')
+	# canmove = 1
+	# origin_deviation=[0,0,0]
+	# movement_coordinates = (coordinates(origin_deviation,move_string,canmove,initial_xyz))
 
-	for i in range(4):
-		movement(movement_coordinates[i], i)
+	# for i in range(4):
+	# 	movement(movement_coordinates[i], i)
 
 	
 
