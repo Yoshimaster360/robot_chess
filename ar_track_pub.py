@@ -19,22 +19,26 @@ def ar_track(last_frame):
 	ar_to_cb = np.array([.1, .1, 0])
 	current_frame = cam_to_ar - ar_to_cb
 	if 	sum(abs(current_frame - last_frame)) >= .02:
-		origin_deviation = current_frame - last_frame
-		#  to sprintf in C or MATLAB)
-		pub_origin_deviation = Float64MultiArray(data=origin_deviation)
 
+		origin_deviation = current_frame - last_frame
+		
+		# origin_deviation = np.append(origin_deviation,['this works'])
+		pub_origin_deviation = Float64MultiArray(data=origin_deviation)
+		
 		# Publish our string to the 'origin_deviation' topic
 		origin_transform.publish(pub_origin_deviation)
 		print('I have Published')
-		
+
 		return(current_frame,origin_deviation)
 	
 
 	else:
 		origin_deviation = [0,0,0]
-		#  to sprintf in C or MATLAB)
+		
+		# origin_deviation = np.append(origin_deviation,['this works'])
+		
 		pub_origin_deviation = Float64MultiArray(data=origin_deviation)
-
+		
 		# Publish our string to the 'origin_deviation' topic
 		origin_transform.publish(pub_origin_deviation)
 		print('I have Published')
