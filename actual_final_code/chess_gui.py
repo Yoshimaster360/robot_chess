@@ -7,10 +7,10 @@ This module is the execution point of the chess GUI application.
 import sys
 
 import chess
-
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtSvg import QSvgWidget
+#from PyQt4.QtWidgets import QApplication
+from PyQt4.QtGui import QWidget, QApplication
 
 piece_name_index = {}
 for i,v in zip(['pawn','knight','bishop','rook','queen','king', 'blank'], [1,2,3,4,5,6, None]):

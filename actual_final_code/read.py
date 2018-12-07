@@ -8,7 +8,7 @@ import sounddevice as sd
 #http://www.fromtexttospeech.com/
 
 #Change to device 4 to play with speakers or whatever python -m sounddevice says the device number is
-playable_device = 2
+playable_device = 15
 
 def read_mp3(file_path, as_float = False):
     """

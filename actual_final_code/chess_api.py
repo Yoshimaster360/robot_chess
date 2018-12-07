@@ -41,15 +41,16 @@ def display_fix_dialog(board = None):
 	return result
 
 def return_move_strings(board):
-	engine = chess.uci.popen_engine("/Users/yashaektefaie/Dropbox/ee106a/robot_chess/actual_final_code/stockfish-10-mac/Mac/stockfish-10-64")
+	engine = chess.uci.popen_engine("/home/cc/ee106a/fa18/class/ee106a-abh/ros_workspaces/lab5/src/ik/launch/lab5/robot_chess/actual_final_code/stockfish-10-linux/Linux/stockfish_10_x64")
 	engine.uci()
 	engine.position(board)
 	best_move = engine.go(movetime=2000).bestmove
 	print(best_move)
 	start, end = re.findall('[a-z][0-9]', str(best_move))
+	start, end = start[0].upper() + start[1], end[0].upper() + end[0]
 	movement_string = 'M-{}-{}'.format(start, end)
 	if(board.remove_piece_at(square_name_index[end])):
-		remove_string = 'R-{}'.format(end)
+		remove_string = 'R-{}'.format(end[0].upper()+end[1])
 	else:
 		remove_string = None
 	return movement_string, remove_string, best_move

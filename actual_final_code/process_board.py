@@ -1,19 +1,21 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+import sys
+sys.path.insert(1, '/home/cc/ee106a/fa18/class/ee106a-abh/.local/lib/python3.4/site-packages')
 import cv2
-import mahotas as mh
 from pylab import imshow, gray, show
 from PIL import Image
 import PIL.ImageOps
 import imutils
 import scipy.misc
 import math
-from skimage.measure import compare_ssim as ssim
 from keras.models import load_model
 from keras.preprocessing import image
 import os 
 import chess
+
+#/home/cc/ee106a/fa18/class/ee106a-abh/.local/bin
 
 #Load the color model
 color = load_model('color_model.h5')
@@ -98,7 +100,6 @@ possible_pieces = [[king_boundaries, 'king'], [queen_boundaries, 'queen'], [bish
                   [pawn_boundaries, 'pawn']]
 possible_color = [[black_boundaries, 'black']]
 
-from skimage.measure import compare_ssim
 from skimage.transform import resize
 from scipy.misc import imsave
 from scipy.ndimage import imread
@@ -130,8 +131,8 @@ def find_closest_letter(input_image3):
             mask = cv2.inRange(imagee, lower, upper)
             output = cv2.bitwise_and(imagee, imagee, mask = mask)
             ret,thresh1 = cv2.threshold(output,1,1,cv2.THRESH_BINARY)
-#             imshow(output)
-#             show()
+            # imshow(output)
+            # show()
             summation = thresh1.sum().sum()
             if(summation > 10 and summation > current_largest):
                 print(lower)
@@ -173,9 +174,13 @@ def find_closest_letter(input_image3):
                 return ['white', piece]
  
 def breakdown_image(image):
+    # print("HI")
     im = Image.open(image)
-    im = im.resize((700,700))
+    # print("HOW ARE")
+    im = im.resize((800,800))
+    # print("YOU")
     final_piece_mapping = {}
+    # print("HERE")
 
     def crop(im):
         imgwidth, imgheight = im.size
@@ -191,11 +196,17 @@ def breakdown_image(image):
             for j in np.linspace(0,imgwidth,9):
                 if(j == 700):
                     break
-                #print("{}\t{}\t{}\t{}".format(j, i, j+width, i+height))
-                box = (j, i, j+width, i+height)
+                print("{}\t{}\t{}\t{}".format(j, i, j+width, i+height))
+                box = (int(j), int(i), int(j+width), int(i+height))
+                # print(box)
+                # print(im.crop(box))
+                # imshow(im.crop(box))
+                # show()
                 pass_in = np.array(im.crop(box))
+                # print("DONE")
 
-                cv2.imwrite('intermediate.png', cv2.cvtColor(pass_in, cv2.COLOR_RGB2BGR))
+                #cv2.imwrite('intermediate.png', cv2.cvtColor(pass_in, cv2.COLOR_RGB2BGR))
+                cv2.imwrite('intermediate.png', pass_in)
                 result = find_closest_letter('intermediate.png')
                 if(result == 'BLANK'):
                     print("LOCATION: {} PIECE: {}".format(total_squares[count],'Blank'))
@@ -236,12 +247,10 @@ def breakdown_image(image):
 def identify_pieces_on_board():
 
     # fig = plt.figure(figsize=(50, 50))  # width, height in inches
-
-
-    try:
-        final_piece_mapping = breakdown_image('board.jpg')
-    except:
-        return False
+    # try:
+    final_piece_mapping = breakdown_image('board.jpg')
+    # except:
+    #     return False, False
     board = chess.Board()
     board.set_piece_map(final_piece_mapping)
     print(board)

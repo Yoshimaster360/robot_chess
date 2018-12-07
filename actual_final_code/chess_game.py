@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import chess
 import chess.uci
 import sys
@@ -9,6 +10,22 @@ from pylab import imshow, gray, show
 from chess_api import *
 from speechrecognition import *
 
+import numpy as np
+from numpy import linalg
+import rospy
+from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
+from geometry_msgs.msg import PoseStamped
+from moveit_commander import MoveGroupCommander
+from intera_interface import gripper as robot_gripper
+import tf2_ros
+from std_msgs.msg import String
+from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray
+
+rospy.init_node('controller')
+move_set = rospy.Pulisher('move_set', Float64MultiArray, queue_size=10)
+rospy.Rate(10)
+print("Defined Publisher")
 
 def capture_current_image():
 	successful_capture = False
@@ -43,32 +60,28 @@ while(not current_board.is_game_over()):
 	play('moving_time.mp3')
 	#######
 	#SEND INFORMATION OVER...?	
-	#Wait while waiting for robot to finish moving	
-	#######
-	valid_move = False
-	while(not valid_move):
-		play('waiting_for_you.mp3')
-		result = None
-		while(not result or (result != 'done' and result != 'finish')):
-			print("Have not received anything yet result is {} right now".format(result))
-			result = get_audio_input()
-		play('checking_you_out.mp3')
-		post_movement = capture_current_image()
-		print("OLD BOARD \n {}".format(current_board))
-		print("NEW BOARD \n {}".format(post_movement))
-		moves_detected, removes_detected = get_what_happened(current_board, post_movement)
-		if(not moves_detected and not removes_detected):
-			play('cheating.mp3')
-		else:
-			valid_move = True
-	play('moving_on.mp3')
-	current_board = post_movement.copy()
+	
+	
+	move_set.publish(Float64MultiArray(data = [movement_strings, remove_string, [0,0,0], 1]))
 
 
 
-
-
-
-
-
-
+	# #######
+	# valid_move = False
+	# while(not valid_move):
+	# 	play('waiting_for_you.mp3')
+	# 	# result = None
+	# 	# while(not result or (result != 'done' and result != 'finish')):
+	# 	# 	print("Have not received anything yet result is {} right now".format(result))
+	# 	# 	result = get_audio_input()
+	# 	play('checking_you_out.mp3')
+	# 	post_movement = capture_current_image()
+	# 	print("OLD BOARD \n {}".format(current_board))
+	# 	print("NEW BOARD \n {}".format(post_movement))
+	# 	moves_detected, removes_detected = get_what_happened(current_board, post_movement)
+	# 	if(not moves_detected and not removes_detected):
+	# 		play('cheating.mp3')
+	# 	else:
+	# 		valid_move = True
+	# play('moving_on.mp3')
+	# current_board = post_movement.copy()
